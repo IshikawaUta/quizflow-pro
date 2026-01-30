@@ -8,38 +8,38 @@ title: Manajemen Ujian
         <div class="flex items-center gap-8">
             <a href="/admin" class="text-white font-black italic tracking-tighter flex items-center gap-2 text-xl">
                 <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center italic text-sm">A</div>
-                ADMIN PANEL
+                ADMIN <span class="text-blue-500">PANEL</span>
             </a>
             <div class="hidden md:flex items-center gap-6">
-                <a href="/admin" class="text-xs font-bold uppercase text-white tracking-widest border-b-2 border-blue-500 pb-1">Daftar Ujian</a>
+                <a href="/admin" class="text-xs font-bold uppercase text-white tracking-widest border-b-2 border-blue-500 pb-1 transition-all">Daftar Ujian</a>
                 <a href="/admin/rekap" class="text-xs font-bold uppercase text-slate-400 hover:text-white tracking-widest transition-colors">Rekap Nilai</a>
             </div>
         </div>
 
         <div class="flex items-center gap-4">
-            <div class="hidden sm:flex flex-col items-end mr-2">
-                <span class="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Logged in as</span>
+            <div class="hidden sm:flex flex-col items-end mr-2 text-right">
+                <span class="text-[10px] text-slate-500 font-black uppercase tracking-widest">Logged in as</span>
                 <span id="admin-name-display" class="text-xs font-bold text-white italic">Administrator</span>
             </div>
-            <button onclick="netlifyIdentity.logout()" class="p-2.5 bg-red-500/10 text-red-500 rounded-xl hover:bg-red-500 hover:text-white transition-all">
-                <i data-lucide="log-out" class="w-5 h-5"></i>
+            <button onclick="netlifyIdentity.logout()" class="p-2.5 bg-red-500/10 text-red-500 rounded-xl hover:bg-red-500 hover:text-white transition-all shadow-lg group">
+                <i data-lucide="log-out" class="w-5 h-5 group-hover:scale-110 transition-transform"></i>
             </button>
         </div>
     </div>
 </nav>
 
 <div x-data="adminApp()" x-init="init()" x-cloak class="max-w-7xl mx-auto px-6 pb-20">
-    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-4">
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-6">
         <div>
-            <h2 class="text-3xl font-black text-white italic tracking-tighter uppercase">Daftar <span class="text-blue-500">Ujian Aktif</span></h2>
-            <p class="text-slate-500 text-sm mt-1">Kelola soal, durasi, dan akses ujian Anda di sini.</p>
+            <h2 class="text-4xl font-black text-white italic tracking-tighter uppercase">Daftar <span class="text-blue-500">Ujian Aktif</span></h2>
+            <p class="text-slate-500 text-sm mt-1 font-medium">Kelola soal, durasi, dan pantau hasil ujian siswa secara real-time.</p>
         </div>
-        <div class="flex gap-3">
-            <button @click="init()" class="p-4 bg-slate-800 text-white rounded-2xl hover:bg-slate-700 transition-all border border-slate-700">
+        <div class="flex gap-3 w-full md:w-auto">
+            <button @click="init()" class="p-4 bg-slate-800 text-white rounded-2xl hover:bg-slate-700 transition-all border border-slate-700 shadow-xl" title="Refresh Data">
                 <i data-lucide="refresh-cw" :class="loading ? 'animate-spin' : ''" class="w-5 h-5"></i>
             </button>
-            <a href="/admin/create.html" class="flex items-center gap-2 px-6 py-4 bg-blue-600 text-white rounded-2xl font-bold hover:bg-blue-500 transition-all shadow-xl shadow-blue-900/20">
-                <i data-lucide="plus-circle" class="w-5 h-5"></i> BUAT UJIAN BARU
+            <a href="/admin/create.html" class="flex-1 md:flex-none flex items-center justify-center gap-3 px-8 py-4 bg-blue-600 text-white rounded-2xl font-black italic tracking-tight hover:bg-blue-500 transition-all shadow-2xl shadow-blue-900/40">
+                <i data-lucide="plus-circle" class="w-6 h-6"></i> BUAT UJIAN BARU
             </a>
         </div>
     </div>
@@ -47,44 +47,65 @@ title: Manajemen Ujian
     <template x-if="loading">
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <template x-for="i in 3">
-                <div class="glass p-8 rounded-[2rem] border border-slate-800 animate-pulse">
+                <div class="glass p-8 rounded-[2.5rem] border border-slate-800 animate-pulse bg-slate-800/20">
+                    <div class="flex justify-between mb-8">
+                        <div class="w-12 h-12 bg-slate-800 rounded-2xl"></div>
+                        <div class="w-20 h-6 bg-slate-800 rounded-lg"></div>
+                    </div>
                     <div class="h-6 bg-slate-800 rounded-lg w-3/4 mb-4"></div>
-                    <div class="h-4 bg-slate-800 rounded-lg w-1/2 mb-8"></div>
-                    <div class="h-12 bg-slate-800 rounded-xl w-full"></div>
+                    <div class="h-4 bg-slate-800 rounded-lg w-1/2 mb-10"></div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="h-12 bg-slate-800 rounded-xl"></div>
+                        <div class="h-12 bg-slate-800 rounded-xl"></div>
+                    </div>
                 </div>
             </template>
         </div>
     </template>
 
-    <div x-show="!loading" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div x-show="!loading" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" x-transition:enter="transition ease-out duration-300">
         <template x-for="quiz in quizzes" :key="quiz._id">
-            <div class="glass p-8 rounded-[2.5rem] border border-slate-800 bg-slate-800/20 group hover:border-blue-500/30 transition-all relative overflow-hidden">
+            <div class="glass p-8 rounded-[2.5rem] border border-slate-800 bg-slate-800/20 group hover:border-blue-500/40 transition-all relative overflow-hidden flex flex-col shadow-xl">
+                <div class="absolute -right-10 -top-10 w-32 h-32 bg-blue-500/5 rounded-full blur-3xl group-hover:bg-blue-500/10 transition-all"></div>
+
                 <div class="flex justify-between items-start mb-6">
-                    <div class="p-3 bg-blue-600/10 rounded-2xl border border-blue-500/20">
-                        <i data-lucide="file-text" class="text-blue-400 w-6 h-6"></i>
+                    <div class="p-3 bg-blue-600/10 rounded-2xl border border-blue-500/20 text-blue-400">
+                        <i data-lucide="file-text" class="w-6 h-6"></i>
                     </div>
-                    <div class="flex gap-2">
-                        <button @click="editQuiz(quiz._id)" class="p-2 text-slate-400 hover:text-white transition-colors">
+                    <div class="flex gap-1">
+                        <button @click="editQuiz(quiz._id)" class="p-2.5 text-slate-500 hover:text-blue-400 hover:bg-blue-500/10 rounded-xl transition-all" title="Edit Ujian">
                             <i data-lucide="edit-3" class="w-5 h-5"></i>
                         </button>
-                        <button @click="deleteQuiz(quiz._id)" class="p-2 text-red-400/50 hover:text-red-500 transition-colors">
-                            <i data-lucide="trash-2" class="w-5 h-5"></i>
+                        <button 
+                            @click.stop="deleteQuiz(quiz._id)" 
+                            type="button"
+                            class="relative z-30 p-2.5 text-slate-500 hover:text-red-500 hover:bg-red-500/10 rounded-xl transition-all group/btn" 
+                            title="Hapus Ujian">
+                            <i data-lucide="trash-2" class="w-5 h-5 pointer-events-none"></i>
                         </button>
                     </div>
                 </div>
 
-                <h3 class="text-xl font-bold text-white mb-2 line-clamp-1" x-text="quiz.title"></h3>
-                <div class="flex items-center gap-4 text-xs text-slate-500 font-bold uppercase tracking-widest mb-8">
-                    <span class="flex items-center gap-1"><i data-lucide="clock" class="w-3 h-3"></i> <span x-text="quiz.duration + 'm'"></span></span>
-                    <span class="flex items-center gap-1"><i data-lucide="help-circle" class="w-3 h-3"></i> <span x-text="quiz.questions.length + ' Soal'"></span></span>
+                <h3 class="text-xl font-black text-white mb-3 line-clamp-2 uppercase tracking-tight group-hover:text-blue-400 transition-colors" x-text="quiz.title"></h3>
+                
+                <div class="flex flex-wrap gap-4 text-[10px] text-slate-500 font-black uppercase tracking-[0.15em] mb-8">
+                    <span class="flex items-center gap-1.5 bg-slate-900/50 px-3 py-1.5 rounded-lg border border-slate-700/50">
+                        <i data-lucide="clock" class="w-3.5 h-3.5 text-blue-500"></i> <span x-text="quiz.duration + ' MENIT'"></span>
+                    </span>
+                    <span class="flex items-center gap-1.5 bg-slate-900/50 px-3 py-1.5 rounded-lg border border-slate-700/50">
+                        <i data-lucide="help-circle" class="w-3.5 h-3.5 text-emerald-500"></i> <span x-text="quiz.questions.length + ' SOAL'"></span>
+                    </span>
+                    <span class="flex items-center gap-1.5 bg-slate-900/50 px-3 py-1.5 rounded-lg border border-slate-700/50">
+                        <i data-lucide="award" class="w-3.5 h-3.5 text-amber-500"></i> <span x-text="'PASS: ' + (quiz.passing_grade || 75) + '%'"></span>
+                    </span>
                 </div>
 
-                <div class="grid grid-cols-2 gap-3">
-                    <button @click="copyLink(quiz._id)" class="flex items-center justify-center gap-2 py-3 bg-slate-800 text-white rounded-xl text-xs font-bold hover:bg-slate-700 transition-all">
-                        <i data-lucide="link" class="w-3 h-3"></i> SALIN LINK
+                <div class="grid grid-cols-2 gap-3 mt-auto">
+                    <button @click="copyLink(quiz._id)" class="flex items-center justify-center gap-2 py-4 bg-slate-800 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-700 transition-all border border-slate-700 active:scale-95">
+                        <i data-lucide="link" class="w-4 h-4 text-blue-400"></i> SALIN LINK
                     </button>
-                    <a :href="'/admin/rekap?id=' + quiz._id" class="flex items-center justify-center gap-2 py-3 bg-blue-600/10 text-blue-400 rounded-xl text-xs font-bold hover:bg-blue-600 hover:text-white transition-all border border-blue-500/20">
-                        <i data-lucide="bar-chart-2" class="w-3 h-3"></i> HASIL
+                    <a :href="'/admin/rekap?id=' + quiz._id" class="flex items-center justify-center gap-2 py-4 bg-blue-600/10 text-blue-400 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-blue-600 hover:text-white transition-all border border-blue-500/20 active:scale-95">
+                        <i data-lucide="bar-chart-2" class="w-4 h-4"></i> HASIL
                     </a>
                 </div>
             </div>
@@ -92,27 +113,18 @@ title: Manajemen Ujian
     </div>
 
     <template x-if="!loading && quizzes.length === 0">
-        <div class="text-center py-20 glass rounded-[3rem] border-2 border-dashed border-slate-800">
-            <i data-lucide="inbox" class="w-16 h-16 text-slate-700 mx-auto mb-4"></i>
-            <p class="text-slate-500 italic font-medium">Belum ada ujian. Klik "Buat Ujian Baru" untuk memulai.</p>
+        <div class="text-center py-32 glass rounded-[3rem] border-2 border-dashed border-slate-800 bg-slate-800/10">
+            <div class="w-20 h-20 bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-6">
+                <i data-lucide="inbox" class="w-10 h-10 text-slate-600"></i>
+            </div>
+            <h3 class="text-xl font-bold text-slate-300 uppercase tracking-widest">Belum Ada Ujian</h3>
+            <p class="text-slate-500 mt-2 font-medium">Klik tombol "Buat Ujian Baru" untuk mulai mempublikasikan soal.</p>
         </div>
     </template>
 </div>
 
 <script>
-// --- SECURITY GUARD ---
-// Langsung tendang jika tidak ada session saat load pertama kali
-document.addEventListener("DOMContentLoaded", () => {
-    const user = netlifyIdentity.currentUser();
-    if (!user) {
-        // Beri delay sedikit untuk inisialisasi widget
-        setTimeout(() => {
-            if (!netlifyIdentity.currentUser()) window.location.href = "/";
-        }, 800);
-    }
-});
-
-// Listener logout global
+// --- GLOBAL AUTH GUARD ---
 netlifyIdentity.on("logout", () => window.location.href = "/");
 
 function adminApp() {
@@ -122,64 +134,71 @@ function adminApp() {
 
         async init() {
             this.loading = true;
-            
             try {
-                // Menunggu user benar-benar siap
                 const user = await this.waitForUser();
-                
                 if (!user) {
                     window.location.href = "/";
                     return;
                 }
 
-                // Tampilkan nama admin
+                // Update Nama Admin di UI
                 const display = document.getElementById('admin-name-display');
-                if (display) display.innerText = user.user_metadata.full_name || user.email;
+                if (display) display.innerText = user.user_metadata?.full_name || user.email;
 
                 const token = await user.jwt();
                 const res = await fetch(`/.netlify/functions/manage-quizzes?t=${Date.now()}`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
+                    headers: { 
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
                 });
 
-                if (!res.ok) throw new Error("Gagal mengambil data");
-                this.quizzes = await res.json();
+                if (res.status === 401) {
+                    netlifyIdentity.logout();
+                    return;
+                }
+
+                const data = await res.json();
+                this.quizzes = Array.isArray(data) ? data : [];
             } catch (e) {
-                console.error("Init Error:", e);
-                // alert("Gagal memuat data. Pastikan Anda login sebagai admin.");
+                console.error("Admin Init Error:", e);
             } finally {
                 this.loading = false;
                 this.$nextTick(() => { if(window.lucide) lucide.createIcons(); });
             }
         },
 
-        // Helper untuk menangani race condition saat load user
         waitForUser() {
             return new Promise((resolve) => {
                 const user = netlifyIdentity.currentUser();
                 if (user) return resolve(user);
-                
                 netlifyIdentity.on('init', u => resolve(u));
-                // Timeout jika 3 detik tidak ada respon
-                setTimeout(() => resolve(null), 3000);
+                netlifyIdentity.on('login', u => resolve(u));
+                setTimeout(() => resolve(null), 4000);
             });
         },
 
         async deleteQuiz(id) {
-            if (!confirm("Hapus ujian ini dan semua nilai siswa terkait?")) return;
+            if (!confirm("PERINGATAN!\n\nMenghapus ujian ini akan menghapus semua data soal dan SEMUA NILAI SISWA yang terkait secara permanen. Lanjutkan?")) return;
+            
             try {
                 const user = netlifyIdentity.currentUser();
                 const token = await user?.jwt();
+                
                 const res = await fetch(`/.netlify/functions/manage-quizzes?id=${id}`, { 
                     method: 'DELETE',
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
+
                 if (res.ok) {
-                    this.init(); 
+                    this.quizzes = this.quizzes.filter(q => q._id !== id);
+                    alert("Ujian berhasil dihapus.");
                 } else {
-                    alert("Gagal menghapus.");
+                    const err = await res.json();
+                    alert("Gagal menghapus: " + (err.error || "Server error"));
                 }
             } catch (e) { 
-                alert("Terjadi kesalahan.");
+                alert("Terjadi kesalahan koneksi.");
             }
         },
 
@@ -190,7 +209,9 @@ function adminApp() {
         copyLink(id) {
             const link = `${window.location.origin}/exam.html?id=${id}`;
             navigator.clipboard.writeText(link).then(() => {
-                alert("Link ujian berhasil disalin ke clipboard!");
+                alert("Link ujian disalin ke clipboard!");
+            }).catch(() => {
+                alert("Link: " + link);
             });
         }
     }
@@ -198,5 +219,9 @@ function adminApp() {
 </script>
 
 <style>
-[x-cloak] { display: none !important; }
+    .glass { background: rgba(30, 41, 59, 0.4); backdrop-filter: blur(20px); }
+    [x-cloak] { display: none !important; }
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: #0f172a; }
+    ::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
 </style>

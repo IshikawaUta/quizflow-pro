@@ -12,14 +12,18 @@ title: Buat Ujian Baru
     </div>
 
     <div class="glass p-8 md:p-12 rounded-[3rem] border border-slate-800 shadow-2xl space-y-8 bg-slate-800/50">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
             <div class="md:col-span-2">
                 <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Judul Ujian</label>
-                <input type="text" x-model="quiz.title" placeholder="Misal: Ujian Tengah Semester Matematika" class="w-full bg-slate-900 border-none rounded-2xl p-4 focus:ring-2 focus:ring-blue-500 outline-none text-white font-bold">
+                <input type="text" x-model="quiz.title" placeholder="Misal: UTS Matematika" class="w-full bg-slate-900 border-none rounded-2xl p-4 focus:ring-2 focus:ring-blue-500 outline-none text-white font-bold">
             </div>
             <div>
                 <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Durasi (Menit)</label>
                 <input type="number" x-model.number="quiz.duration" class="w-full bg-slate-900 border-none rounded-2xl p-4 focus:ring-2 focus:ring-blue-500 outline-none text-white font-bold">
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Lulus (%)</label>
+                <input type="number" x-model.number="quiz.passing_grade" placeholder="75" class="w-full bg-slate-900 border-none rounded-2xl p-4 focus:ring-2 focus:ring-emerald-500 outline-none text-white font-bold">
             </div>
         </div>
 
@@ -73,79 +77,39 @@ function createApp() {
         quiz: {
             title: '',
             duration: 60,
-            questions: [
-                { text: '', options: ['', '', '', ''], correct_answer_index: 0 }
-            ]
+            passing_grade: 75,
+            questions: [{ text: '', options: ['', '', '', ''], correct_answer_index: 0 }]
         },
-
         init() {
-            // Cek apakah admin sudah login, jika tidak tendang ke halaman login/admin
             setTimeout(() => {
-                if (!netlifyIdentity.currentUser()) {
-                    window.location.href = '/admin';
-                }
+                if (!netlifyIdentity.currentUser()) window.location.href = '/admin';
             }, 1000);
-            
             if(window.lucide) lucide.createIcons();
         },
-
         addQuestion() {
-            this.quiz.questions.push({
-                text: '',
-                options: ['', '', '', ''],
-                correct_answer_index: 0
-            });
+            this.quiz.questions.push({ text: '', options: ['', '', '', ''], correct_answer_index: 0 });
             this.$nextTick(() => { if(window.lucide) lucide.createIcons(); });
         },
-
         removeQuestion(index) {
-            if(this.quiz.questions.length > 1) {
-                this.quiz.questions.splice(index, 1);
-            } else {
-                alert("Minimal harus ada 1 pertanyaan.");
-            }
+            if(this.quiz.questions.length > 1) this.quiz.questions.splice(index, 1);
         },
-
         async saveQuiz() {
-            // Validasi Sederhana
-            if (!this.quiz.title) return alert("Harap isi judul ujian.");
-            if (this.quiz.questions.some(q => !q.text)) return alert("Ada pertanyaan yang masih kosong.");
-            
+            if (!this.quiz.title) return alert("Isi judul!");
             this.loading = true;
-
             try {
-                // Ambil Token JWT dari Netlify Identity
                 const user = netlifyIdentity.currentUser();
                 const token = await user?.jwt();
-
-                if (!token) {
-                    alert("Sesi berakhir, silakan login kembali.");
-                    return;
-                }
-
-                // Gunakan endpoint manage-quizzes agar seragam (POST)
                 const res = await fetch('/.netlify/functions/manage-quizzes', {
                     method: 'POST',
-                    headers: { 
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}` 
-                    },
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                     body: JSON.stringify(this.quiz)
                 });
-
-                const result = await res.json();
-
                 if (res.ok) {
-                    alert("Ujian berhasil dipublikasikan!");
+                    alert("Berhasil!");
                     window.location.href = '/admin';
-                } else {
-                    throw new Error(result.error || "Gagal menyimpan");
                 }
-            } catch (e) {
-                alert("Terjadi kesalahan: " + e.message);
-            } finally {
-                this.loading = false;
-            }
+            } catch (e) { alert(e.message); }
+            finally { this.loading = false; }
         }
     }
 }

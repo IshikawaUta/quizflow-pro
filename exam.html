@@ -6,44 +6,50 @@ title: Persiapan Ujian
     
     <template x-if="loading">
         <div class="flex flex-col items-center justify-center py-20">
-            <div class="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-            <p class="mt-4 text-slate-400 font-bold animate-pulse">MENYIAPKAN SOAL...</p>
+            <div class="w-12 h-12 border-4 border-blue-500/20 border-t-blue-500 rounded-full animate-spin"></div>
+            <p class="mt-4 text-slate-500 font-black italic tracking-widest animate-pulse uppercase text-xs">Menyiapkan Lembar Jawaban...</p>
         </div>
     </template>
 
     <template x-if="!started && !loading && quiz">
         <div class="animate-fade">
-            <div class="glass p-10 rounded-[2.5rem] shadow-2xl border-t-4 border-blue-500 bg-slate-800/40">
-                <h1 class="text-3xl font-black mb-2 italic uppercase tracking-tighter">IDENTITAS <span class="text-blue-500">SISWA</span></h1>
-                <p class="text-slate-400 mb-8">Silakan lengkapi data diri sebelum memulai ujian.</p>
+            <div class="glass p-10 rounded-[2.5rem] shadow-2xl border border-slate-800 bg-slate-800/40 relative overflow-hidden">
+                <div class="absolute -right-10 -top-10 w-32 h-32 bg-blue-600/10 rounded-full blur-3xl"></div>
+                
+                <h1 class="text-3xl font-black mb-2 italic uppercase tracking-tighter text-white">IDENTITAS <span class="text-blue-500">SISWA</span></h1>
+                <p class="text-slate-500 font-medium mb-8 text-sm uppercase tracking-wider" x-text="quiz.title"></p>
                 
                 <div class="space-y-6">
                     <div>
-                        <label class="text-xs font-bold uppercase tracking-widest text-slate-500 mb-2 block">Nama Lengkap</label>
-                        <input type="text" x-model="student.name" placeholder="Contoh: Budi Santoso" class="w-full bg-slate-900 border-none rounded-2xl p-4 focus:ring-2 focus:ring-blue-500 outline-none text-white font-bold">
+                        <label class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 mb-2 block">Nama Lengkap</label>
+                        <input type="text" x-model="student.name" placeholder="Masukkan nama sesuai absen" class="w-full bg-slate-900 border border-slate-800 rounded-2xl p-4 focus:ring-2 focus:ring-blue-500 outline-none text-white font-bold transition-all placeholder:text-slate-700">
                     </div>
                     
                     <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <label class="text-xs font-bold uppercase tracking-widest text-slate-500 mb-2 block">No. Absensi</label>
-                            <input type="number" x-model="student.absent" placeholder="01" class="w-full bg-slate-900 border-none rounded-2xl p-4 focus:ring-2 focus:ring-blue-500 outline-none text-white font-bold">
+                            <label class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 mb-2 block">No. Absensi</label>
+                            <input type="number" x-model="student.absent" placeholder="01" class="w-full bg-slate-900 border border-slate-800 rounded-2xl p-4 focus:ring-2 focus:ring-blue-500 outline-none text-white font-bold transition-all">
                         </div>
                         <div>
-                            <label class="text-xs font-bold uppercase tracking-widest text-slate-500 mb-2 block">Kelas</label>
-                            <input type="text" x-model="student.class" placeholder="XII - RPL" class="w-full bg-slate-900 border-none rounded-2xl p-4 focus:ring-2 focus:ring-blue-500 outline-none text-white font-bold">
+                            <label class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 mb-2 block">Kelas</label>
+                            <input type="text" x-model="student.class" placeholder="Contoh: XII - RPL" class="w-full bg-slate-900 border border-slate-800 rounded-2xl p-4 focus:ring-2 focus:ring-blue-500 outline-none text-white font-bold transition-all">
                         </div>
                     </div>
 
-                    <div class="bg-blue-500/10 p-4 rounded-2xl border border-blue-500/20 mb-4">
-                        <div class="flex items-center gap-3 text-blue-400 mb-1">
-                            <i data-lucide="clock" class="w-4 h-4"></i>
-                            <span class="text-xs font-black uppercase tracking-widest">Informasi Ujian</span>
+                    <div class="bg-blue-500/5 p-5 rounded-2xl border border-blue-500/20 mb-4">
+                        <div class="flex items-center gap-3 text-blue-400 mb-2">
+                            <i data-lucide="shield-check" class="w-4 h-4 text-blue-500"></i>
+                            <span class="text-[10px] font-black uppercase tracking-widest">Aturan Ujian</span>
                         </div>
-                        <p class="text-sm text-slate-300">Waktu pengerjaan adalah <span class="font-bold text-white" x-text="quiz.duration"></span> menit. Pastikan koneksi internet stabil.</p>
+                        <ul class="text-xs text-slate-400 space-y-2 font-medium">
+                            <li class="flex items-center gap-2"><div class="w-1 h-1 bg-blue-500 rounded-full"></div> Durasi: <span class="text-white font-bold" x-text="quiz.duration"></span> Menit</li>
+                            <li class="flex items-center gap-2"><div class="w-1 h-1 bg-blue-500 rounded-full"></div> Jawaban tersimpan otomatis secara lokal</li>
+                            <li class="flex items-center gap-2"><div class="w-1 h-1 bg-blue-500 rounded-full"></div> Dilarang me-refresh halaman saat ujian</li>
+                        </ul>
                     </div>
 
                     <button @click="startUjian" :disabled="!student.name || !student.absent || !student.class" 
-                            class="w-full py-4 bg-blue-600 hover:bg-blue-500 disabled:opacity-30 disabled:cursor-not-allowed rounded-2xl font-bold text-lg transition-all shadow-xl shadow-blue-900/40 mt-4 text-white">
+                            class="w-full py-4 bg-blue-600 hover:bg-blue-500 disabled:bg-slate-800 disabled:text-slate-600 rounded-2xl font-black text-sm uppercase tracking-[0.2em] transition-all shadow-xl shadow-blue-900/40 mt-4 text-white active:scale-95">
                         MULAI UJIAN SEKARANG
                     </button>
                 </div>
@@ -51,56 +57,68 @@ title: Persiapan Ujian
         </div>
     </template>
 
-    <div x-show="started && !loading" x-cloak>
-        <div class="flex justify-between items-end mb-8 border-b border-slate-800 pb-6 sticky top-0 bg-slate-900/80 backdrop-blur-md z-10 py-4">
+    <div x-show="started && !loading" x-cloak class="animate-fade">
+        <div class="flex justify-between items-center mb-8 border-b border-slate-800 pb-6 sticky top-0 bg-slate-900/90 backdrop-blur-xl z-20 py-4 px-2">
             <div>
-                <h1 class="text-xl font-bold text-blue-400 line-clamp-1" x-text="quiz?.title"></h1>
-                <p class="text-sm text-slate-400" x-text="student.name + ' | ' + student.class"></p>
+                <h1 class="text-sm font-black text-white uppercase tracking-tighter line-clamp-1 mb-1" x-text="quiz?.title"></h1>
+                <div class="flex items-center gap-2 text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+                    <span class="text-blue-500" x-text="student.name"></span>
+                    <span>•</span>
+                    <span x-text="student.class"></span>
+                </div>
             </div>
-            <div class="text-right min-w-[100px]">
-                <p class="text-[10px] uppercase tracking-widest text-slate-500 font-bold">Sisa Waktu</p>
-                <p class="text-3xl font-mono font-bold" :class="timeLeft < 60 ? 'text-red-500 animate-pulse' : 'text-white'" x-text="formatTime(timeLeft)"></p>
+            <div class="text-right bg-slate-800/50 px-4 py-2 rounded-2xl border border-slate-700/50">
+                <p class="text-[9px] uppercase tracking-[0.2em] text-slate-500 font-black mb-1">Sisa Waktu</p>
+                <p class="text-2xl font-mono font-black tabular-nums" :class="timeLeft < 300 ? 'text-rose-500 animate-pulse' : 'text-blue-400'" x-text="formatTime(timeLeft)"></p>
             </div>
         </div>
 
-        <div class="glass p-8 rounded-[2rem] shadow-2xl animate-fade bg-slate-800/40">
-            <div class="flex justify-between items-center mb-6">
-                <span class="px-4 py-1 bg-blue-500/20 text-blue-400 rounded-full text-xs font-bold uppercase tracking-widest">Pertanyaan <span x-text="currentIndex + 1"></span> / <span x-text="quiz?.questions.length"></span></span>
+        <div class="glass p-8 md:p-10 rounded-[2.5rem] shadow-2xl border border-slate-800 bg-slate-800/40 relative">
+            <div class="flex items-center gap-3 mb-8">
+                <span class="px-4 py-1.5 bg-blue-500 text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-blue-500/20">
+                    SOAL NO. <span x-text="currentIndex + 1"></span>
+                </span>
+                <div class="flex-1 h-[2px] bg-slate-800 rounded-full overflow-hidden">
+                    <div class="h-full bg-blue-500 transition-all duration-500" :style="'width:' + ((currentIndex + 1) / quiz?.questions.length * 100) + '%'"></div>
+                </div>
             </div>
             
-            <h2 class="text-2xl font-medium mb-10 leading-relaxed text-white" x-text="quiz?.questions[currentIndex].text"></h2>
+            <h2 class="text-xl md:text-2xl font-bold mb-10 leading-relaxed text-white" x-text="shuffledQuestions[currentIndex].text"></h2>
             
             <div class="space-y-4">
-                <template x-for="(opt, i) in quiz?.questions[currentIndex].options" :key="i">
-                    <button @click="answers[currentIndex] = i"
-                            :class="answers[currentIndex] === i ? 'border-blue-500 bg-blue-500/20 text-white' : 'border-slate-700 bg-slate-900/40 text-slate-300'"
-                            class="w-full text-left p-5 rounded-2xl border-2 transition-all hover:border-slate-500 flex justify-between items-center group">
-                        <span class="text-lg" x-text="opt"></span>
-                        <div class="w-6 h-6 rounded-full border-2 border-slate-600 group-hover:border-blue-500 flex items-center justify-center shrink-0">
-                            <div x-show="answers[currentIndex] === i" class="w-3 h-3 bg-blue-500 rounded-full"></div>
+                <template x-for="(opt, i) in shuffledQuestions[currentIndex].options" :key="i">
+                    <button @click="selectAnswer(i)"
+                            :class="answers[currentIndex] === i ? 'border-blue-500 bg-blue-500/10 text-white' : 'border-slate-800 bg-slate-900/50 text-slate-400'"
+                            class="w-full text-left p-5 rounded-[1.5rem] border-2 transition-all hover:border-slate-600 flex justify-between items-center group active:scale-[0.98]">
+                        <div class="flex items-center gap-4">
+                            <span class="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center text-xs font-black uppercase border border-slate-700 group-hover:bg-blue-600 group-hover:text-white transition-colors" 
+                                  :class="answers[currentIndex] === i ? 'bg-blue-600 text-white' : ''"
+                                  x-text="String.fromCharCode(65 + i)"></span>
+                            <span class="text-base md:text-lg font-medium" x-text="opt"></span>
                         </div>
+                        <i data-lucide="check-circle-2" class="w-5 h-5 text-blue-500 transition-opacity" :class="answers[currentIndex] === i ? 'opacity-100' : 'opacity-0'"></i>
                     </button>
                 </template>
             </div>
         </div>
 
-        <div class="mt-10 flex justify-between gap-4">
-            <button @click="currentIndex--" :disabled="currentIndex === 0" 
-                    class="flex-1 px-6 py-4 rounded-2xl bg-slate-800 hover:bg-slate-700 disabled:opacity-20 font-bold transition-colors text-white uppercase tracking-widest text-xs">
-                KEMBALI
+        <div class="mt-8 grid grid-cols-4 gap-4">
+            <button @click="prev" :disabled="currentIndex === 0" 
+                    class="col-span-1 p-4 rounded-2xl bg-slate-800 text-white disabled:opacity-20 transition-all border border-slate-700 hover:bg-slate-700 active:scale-95">
+                <i data-lucide="chevron-left" class="mx-auto"></i>
             </button>
             
             <template x-if="currentIndex < quiz?.questions.length - 1">
-                <button @click="currentIndex++" 
-                        class="flex-[2] px-10 py-4 rounded-2xl bg-blue-600 hover:bg-blue-500 font-bold transition-all shadow-lg shadow-blue-900/20 text-white uppercase tracking-widest text-xs">
-                    LANJUTKAN
+                <button @click="next" 
+                        class="col-span-3 py-4 rounded-2xl bg-blue-600 text-white font-black uppercase tracking-widest text-xs hover:bg-blue-500 transition-all shadow-xl shadow-blue-900/20 active:scale-95">
+                    Lanjut Ke Nomor Berikutnya
                 </button>
             </template>
             
             <template x-if="currentIndex === quiz?.questions.length - 1">
                 <button @click="finish" 
-                        class="flex-[2] px-10 py-4 rounded-2xl bg-emerald-600 hover:bg-emerald-500 font-bold transition-all shadow-lg shadow-emerald-900/20 text-white uppercase tracking-widest text-xs">
-                    SELESAI & KIRIM
+                        class="col-span-3 py-4 rounded-2xl bg-emerald-600 text-white font-black uppercase tracking-widest text-xs hover:bg-emerald-500 transition-all shadow-xl shadow-emerald-900/20 active:scale-95">
+                    Kirim Seluruh Jawaban
                 </button>
             </template>
         </div>
@@ -111,6 +129,7 @@ title: Persiapan Ujian
 function examBot() {
     return {
         quiz: null, 
+        shuffledQuestions: [],
         loading: true, 
         started: false, 
         currentIndex: 0, 
@@ -128,8 +147,22 @@ function examBot() {
                 if (!res.ok) throw new Error("Gagal mengambil data ujian");
 
                 this.quiz = await res.json();
+                
+                // Acak Pertanyaan
+                this.shuffledQuestions = [...this.quiz.questions].sort(() => Math.random() - 0.5);
+                
                 this.timeLeft = this.quiz.duration * 60;
                 this.answers = Array(this.quiz.questions.length).fill(null);
+                
+                // Cek apakah ada sesi tersimpan di LocalStorage (Auto-recovery)
+                const savedSess = localStorage.getItem(`quiz_session_${id}`);
+                if (savedSess) {
+                    const data = JSON.parse(savedSess);
+                    this.student = data.student;
+                    this.answers = data.answers;
+                    // Opsi: izinkan user melanjutkan jika diinginkan
+                }
+
             } catch (e) {
                 alert(e.message);
                 window.location.href = '/';
@@ -138,7 +171,6 @@ function examBot() {
                 this.$nextTick(() => { if(window.lucide) lucide.createIcons(); });
             }
 
-            // Proteksi: Mencegah refresh/tutup tab saat pengerjaan
             window.addEventListener('beforeunload', (e) => {
                 if (this.started) {
                     e.preventDefault();
@@ -148,14 +180,40 @@ function examBot() {
         },
 
         startUjian() {
+            if(!confirm("Waktu akan mulai berjalan. Pastikan data diri sudah benar!")) return;
             this.started = true;
             this.timerInterval = setInterval(() => { 
                 if(this.timeLeft > 0) {
                     this.timeLeft--; 
+                    // Simpan progres ke LocalStorage tiap menit
+                    if(this.timeLeft % 60 === 0) this.saveProgress();
                 } else {
                     this.autoFinish(); 
                 }
             }, 1000);
+            this.$nextTick(() => { if(window.lucide) lucide.createIcons(); });
+        },
+
+        saveProgress() {
+            const id = this.quiz._id;
+            localStorage.setItem(`quiz_session_${id}`, JSON.stringify({
+                student: this.student,
+                answers: this.answers
+            }));
+        },
+
+        selectAnswer(index) {
+            this.answers[this.currentIndex] = index;
+            this.saveProgress();
+        },
+
+        next() {
+            this.currentIndex++;
+            this.$nextTick(() => { if(window.lucide) lucide.createIcons(); });
+        },
+
+        prev() {
+            this.currentIndex--;
             this.$nextTick(() => { if(window.lucide) lucide.createIcons(); });
         },
 
@@ -167,30 +225,38 @@ function examBot() {
 
         async autoFinish() {
             clearInterval(this.timerInterval);
-            alert("Waktu habis! Jawaban Anda akan dikirim secara otomatis.");
+            alert("WAKTU HABIS! Sistem akan otomatis mengirimkan jawaban Anda.");
             await this.submitData();
         },
 
         async finish() {
             const unanswered = this.answers.filter(a => a === null).length;
-            const msg = unanswered > 0 
-                ? `Ada ${unanswered} soal belum dijawab. Tetap kirim?` 
-                : "Yakin ingin mengakhiri ujian?";
+            let msg = "Yakin ingin mengakhiri ujian?";
+            if(unanswered > 0) msg = `Ada ${unanswered} soal BELUM DIJAWAB. Kirim sekarang?`;
             
             if(!confirm(msg)) return;
             await this.submitData();
         },
 
         async submitData() {
-            if(window.showLoader) window.showLoader(true);
+            this.loading = true; // Show loading overlay
+            clearInterval(this.timerInterval);
             
             try {
+                // Mapping jawaban kembali ke urutan soal asli agar skor valid di backend
+                // (Karena kita mengacak soal di frontend saja)
+                const mappedAnswers = Array(this.quiz.questions.length).fill(null);
+                this.shuffledQuestions.forEach((q, index) => {
+                    const originalIndex = this.quiz.questions.findIndex(oq => oq.text === q.text);
+                    mappedAnswers[originalIndex] = this.answers[index];
+                });
+
                 const res = await fetch('/.netlify/functions/submit-exam', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ 
                         quiz_id: this.quiz._id, 
-                        answers: this.answers, 
+                        answers: mappedAnswers, 
                         student_name: this.student.name,
                         student_absent: this.student.absent,
                         student_class: this.student.class 
@@ -199,17 +265,21 @@ function examBot() {
                 
                 const out = await res.json();
                 if (out.id) {
-                    // Matikan proteksi refresh sebelum pindah halaman
+                    localStorage.removeItem(`quiz_session_${this.quiz._id}`);
                     this.started = false;
                     window.location.href = `/result.html?id=${out.id}`;
-                } else {
-                    throw new Error("Gagal mendapatkan ID hasil");
                 }
             } catch (e) {
-                alert("Terjadi kesalahan saat mengirim jawaban. Silakan hubungi admin.");
-                if(window.showLoader) window.showLoader(false);
+                alert("Koneksi bermasalah. Jangan tutup browser, coba tekan tombol kirim lagi.");
+                this.loading = false;
             }
         }
     }
 }
 </script>
+
+<style>
+    .glass { background: rgba(30, 41, 59, 0.4); backdrop-filter: blur(20px); }
+    [x-cloak] { display: none !important; }
+    input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+</style>

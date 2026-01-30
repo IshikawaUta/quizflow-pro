@@ -23,7 +23,7 @@ title: Edit Ujian
                 <div class="w-16 h-16 border-4 border-blue-500/20 rounded-full"></div>
                 <div class="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin absolute top-0"></div>
             </div>
-            <p class="text-slate-400 font-black italic tracking-widest animate-pulse">MENGAMBIL DATA...</p>
+            <p class="text-slate-400 font-black italic tracking-widest animate-pulse">MENGAMBIL DATA DARI DATABASE...</p>
         </div>
     </template>
 
@@ -34,7 +34,7 @@ title: Edit Ujian
          class="glass p-8 md:p-12 rounded-[3rem] border border-slate-800 shadow-2xl space-y-10 bg-slate-800/30 backdrop-blur-xl" 
          style="display: none;">
         
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div class="md:col-span-2">
                 <label class="block text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-3 ml-2">Judul Ujian</label>
                 <input type="text" x-model="quiz.title" class="w-full bg-slate-900/80 border-2 border-slate-800 rounded-2xl p-4 focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 outline-none text-white font-bold transition-all">
@@ -46,27 +46,45 @@ title: Edit Ujian
                     <i data-lucide="clock" class="absolute right-4 top-4 text-slate-600 w-5 h-5"></i>
                 </div>
             </div>
+            <div>
+                <label class="block text-[10px] font-black text-emerald-500 uppercase tracking-[0.2em] mb-3 ml-2">Passing Grade (%)</label>
+                <div class="relative">
+                    <input type="number" x-model.number="quiz.passing_grade" class="w-full bg-slate-900/80 border-2 border-emerald-500/20 rounded-2xl p-4 focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none text-white font-black transition-all">
+                    <i data-lucide="award" class="absolute right-4 top-4 text-emerald-600 w-5 h-5"></i>
+                </div>
+            </div>
         </div>
+
+        <div class="h-px bg-gradient-to-r from-transparent via-slate-700 to-transparent"></div>
 
         <div class="space-y-12">
             <template x-for="(q, index) in quiz.questions" :key="index">
                 <div class="p-8 bg-slate-900/40 rounded-[2.5rem] border border-slate-800 relative group transition-all hover:border-slate-700 shadow-inner">
+                    
                     <button @click="removeQuestion(index)" class="absolute -top-3 -right-3 w-10 h-10 bg-slate-800 text-red-400 border border-slate-700 rounded-2xl flex items-center justify-center shadow-xl hover:bg-red-500 hover:text-white transition-all z-10">
                         <i data-lucide="trash-2" class="w-5 h-5"></i>
                     </button>
 
                     <div class="mb-8">
                         <label class="text-[10px] font-black text-blue-500 uppercase tracking-widest mb-3 block" x-text="'Pertanyaan #' + (index + 1)"></label>
-                        <textarea x-model="q.text" class="w-full bg-slate-900 border-2 border-slate-800 rounded-2xl p-5 focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none text-white text-sm leading-relaxed min-h-[100px]" rows="3"></textarea>
+                        <textarea x-model="q.text" class="w-full bg-slate-900 border-2 border-slate-800 rounded-2xl p-5 focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none text-white text-sm leading-relaxed min-h-[100px]" rows="3" placeholder="Tulis soal di sini..."></textarea>
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <template x-for="(opt, optIdx) in q.options" :key="optIdx">
                             <div class="relative flex items-center group/opt">
                                 <div class="absolute left-4 z-10 flex items-center">
-                                    <input type="radio" :name="'correct_'+index" :value="optIdx" x-model.number="q.correct_answer_index" class="w-5 h-5 accent-emerald-500 cursor-pointer">
+                                    <input type="radio" 
+                                           :name="'correct_'+index" 
+                                           :value="optIdx" 
+                                           x-model.number="q.correct_answer_index" 
+                                           class="w-5 h-5 accent-emerald-500 cursor-pointer">
                                 </div>
-                                <input type="text" x-model="q.options[optIdx]" class="w-full bg-slate-950/50 border-2 border-slate-800 pl-12 pr-4 py-4 rounded-2xl outline-none text-sm transition-all" :class="q.correct_answer_index == optIdx ? 'border-emerald-500/40 text-emerald-400 bg-emerald-500/5' : 'text-slate-300 focus:border-slate-600'">
+                                <input type="text" 
+                                       x-model="q.options[optIdx]" 
+                                       class="w-full bg-slate-950/50 border-2 border-slate-800 pl-12 pr-4 py-4 rounded-2xl outline-none text-sm transition-all" 
+                                       :class="q.correct_answer_index == optIdx ? 'border-emerald-500/40 text-emerald-400 bg-emerald-500/5' : 'text-slate-300 focus:border-slate-600'"
+                                       :placeholder="'Opsi ' + String.fromCharCode(65 + optIdx)">
                             </div>
                         </template>
                     </div>
@@ -80,8 +98,18 @@ title: Edit Ujian
             </button>
 
             <button @click="updateQuiz()" :disabled="saving" class="w-full py-6 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white rounded-[2.5rem] font-black text-xl shadow-2xl transition-all flex items-center justify-center gap-3">
-                <span x-show="!saving">SIMPAN PERUBAHAN</span>
-                <span x-show="saving">SEDANG MENYIMPAN...</span>
+                <template x-if="!saving">
+                    <div class="flex items-center gap-3">
+                        <i data-lucide="save" class="w-6 h-6"></i>
+                        <span>SIMPAN PERUBAHAN</span>
+                    </div>
+                </template>
+                <template x-if="saving">
+                    <div class="flex items-center gap-3 font-bold italic tracking-widest">
+                        <div class="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                        <span>SEDANG MENYIMPAN...</span>
+                    </div>
+                </template>
             </button>
         </div>
     </div>
@@ -90,7 +118,12 @@ title: Edit Ujian
 <script>
 function editApp() {
     return {
-        quiz: { title: '', duration: 30, questions: [] },
+        quiz: { 
+            title: '', 
+            duration: 30, 
+            passing_grade: 75,
+            questions: [] 
+        },
         quizId: null,
         fetching: true,
         saving: false,
@@ -104,20 +137,52 @@ function editApp() {
                 return;
             }
 
+            // Fungsi pembantu untuk menunggu Netlify Identity siap
+            const waitForAuth = () => new Promise(resolve => {
+                const user = netlifyIdentity.currentUser();
+                if (user) resolve(user);
+                netlifyIdentity.on('init', u => resolve(u));
+                // Timeout jika 4 detik tidak ada respon
+                setTimeout(() => resolve(null), 4000);
+            });
+
             try {
-                // Fetch data tetap bisa dilakukan tanpa token jika function-nya diizinkan, 
-                // tapi biasanya manage-quizzes.js butuh user context.
-                const res = await fetch(`/.netlify/functions/manage-quizzes?id=${this.quizId}`);
+                const user = await waitForAuth();
+                
+                if (!user) {
+                    alert("Sesi tidak ditemukan. Silakan login kembali.");
+                    window.location.href = '/admin';
+                    return;
+                }
+
+                const token = await user.jwt();
+
+                const res = await fetch(`/.netlify/functions/manage-quizzes?id=${this.quizId}`, {
+                    method: 'GET',
+                    headers: { 
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
                 if (res.ok) {
                     const data = await res.json();
+                    // Map data dan pastikan field default ada
                     this.quiz = {
                         title: data.title || '',
                         duration: data.duration || 30,
+                        passing_grade: data.passing_grade || 75,
                         questions: data.questions || []
                     };
+                } else if (res.status === 401) {
+                    alert("Akses ditolak. Silakan login ulang.");
+                    netlifyIdentity.open();
+                } else {
+                    alert("Gagal mengambil data ujian dari database.");
                 }
             } catch (e) {
-                console.error(e);
+                console.error("Init Error:", e);
+                alert("Terjadi kesalahan koneksi.");
             } finally {
                 this.fetching = false;
                 this.$nextTick(() => { if(window.lucide) lucide.createIcons(); });
@@ -125,21 +190,35 @@ function editApp() {
         },
 
         addQuestion() {
-            this.quiz.questions.push({ text: '', options: ['', '', '', ''], correct_answer_index: 0 });
+            this.quiz.questions.push({ 
+                text: '', 
+                options: ['', '', '', ''], 
+                correct_answer_index: 0 
+            });
             this.$nextTick(() => { if(window.lucide) lucide.createIcons(); });
         },
 
         removeQuestion(index) {
-            if(this.quiz.questions.length > 1) this.quiz.questions.splice(index, 1);
+            if(this.quiz.questions.length > 1) {
+                if(confirm("Hapus pertanyaan ini?")) {
+                    this.quiz.questions.splice(index, 1);
+                }
+            } else {
+                alert("Minimal harus terdapat 1 pertanyaan dalam ujian.");
+            }
         },
 
         async updateQuiz() {
+            // Validasi Dasar
+            if (!this.quiz.title.trim()) return alert("Judul ujian tidak boleh kosong.");
+            if (this.quiz.questions.some(q => !q.text.trim())) return alert("Semua pertanyaan harus diisi.");
+
             this.saving = true;
             try {
-                // Catatan: Jika backend manage-quizzes.js mengecek 'context.clientContext.user', 
-                // baris di bawah ini tetap diperlukan agar server mengizinkan akses simpan.
                 const user = netlifyIdentity.currentUser();
                 const token = await user?.jwt();
+
+                if (!token) throw new Error("Sesi berakhir.");
 
                 const res = await fetch(`/.netlify/functions/manage-quizzes?id=${this.quizId}`, {
                     method: 'PUT',
@@ -151,8 +230,11 @@ function editApp() {
                 });
 
                 if (res.ok) {
-                    alert("Berhasil diperbarui!");
+                    alert("Ujian berhasil diperbarui!");
                     window.location.href = '/admin';
+                } else {
+                    const err = await res.json();
+                    throw new Error(err.error || "Gagal menyimpan perubahan.");
                 }
             } catch (e) {
                 alert("Gagal: " + e.message);
@@ -167,4 +249,11 @@ function editApp() {
 <style>
     .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(20px); }
     [x-cloak] { display: none !important; }
+    
+    /* Hilangkan panah input number */
+    input::-webkit-outer-spin-button,
+    input::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
 </style>

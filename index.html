@@ -20,7 +20,7 @@ title: Beranda
     <template x-if="loading">
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
             <template x-for="i in 3">
-                <div class="glass p-8 rounded-[2.5rem] border border-slate-800 animate-pulse">
+                <div class="glass p-8 rounded-[2.5rem] border border-slate-800 animate-pulse bg-slate-800/20">
                     <div class="w-12 h-12 bg-slate-800 rounded-2xl mb-6"></div>
                     <div class="h-6 bg-slate-800 rounded-lg w-3/4 mb-4"></div>
                     <div class="h-4 bg-slate-800 rounded-lg w-1/2 mb-8"></div>
@@ -45,11 +45,18 @@ title: Beranda
                     </div>
                 </div>
 
-                <h3 class="text-2xl font-bold mb-2 text-white group-hover:text-blue-400 transition-colors" x-text="quiz.title"></h3>
-                <p class="text-slate-400 text-sm mb-8 flex-grow">
-                    Terdapat <span class="text-slate-200 font-bold" x-text="quiz.questions.length"></span> pertanyaan. 
-                    Minimal kelulusan: <span class="text-emerald-400 font-bold" x-text="100 + '%'"></span> <!-- <span class="text-emerald-400 font-bold" x-text="quiz.passing_score + '%'"></span> -->
-                </p>
+                <h3 class="text-2xl font-bold mb-2 text-white group-hover:text-blue-400 transition-colors uppercase tracking-tight" x-text="quiz.title"></h3>
+                
+                <div class="space-y-2 mb-8 flex-grow">
+                    <p class="text-slate-400 text-sm">
+                        <i data-lucide="help-circle" class="w-3 h-3 inline mr-1 opacity-50"></i>
+                        Total <span class="text-slate-200 font-bold" x-text="quiz.questions ? quiz.questions.length : 0"></span> Pertanyaan
+                    </p>
+                    <p class="text-slate-400 text-sm">
+                        <i data-lucide="shield-check" class="w-3 h-3 inline mr-1 opacity-50"></i>
+                        Batas Lulus: <span class="text-emerald-400 font-black" x-text="(quiz.passing_grade || 75) + '%'"></span>
+                    </p>
+                </div>
 
                 <a :href="'/exam.html?id=' + quiz._id" 
                    class="block w-full text-center py-4 bg-white text-slate-900 rounded-2xl font-black uppercase tracking-tighter hover:bg-blue-600 hover:text-white transition-all shadow-xl shadow-white/5 active:scale-95">
@@ -60,10 +67,10 @@ title: Beranda
     </div>
 
     <template x-if="quizzes.length === 0 && !loading">
-        <div class="text-center py-24 glass rounded-[3rem] border border-dashed border-slate-700">
+        <div class="text-center py-24 glass rounded-[3rem] border border-dashed border-slate-700 bg-slate-800/10">
             <i data-lucide="inbox" class="w-20 h-20 text-slate-800 mx-auto mb-6"></i>
-            <h2 class="text-xl font-bold text-slate-300 mb-2">Belum Ada Ujian</h2>
-            <p class="text-slate-500">Silakan hubungi pengajar untuk ketersediaan ujian terbaru.</p>
+            <h2 class="text-xl font-bold text-slate-300 mb-2 uppercase tracking-widest">Belum Ada Ujian</h2>
+            <p class="text-slate-500">Silakan hubungi pengajar untuk mendapatkan akses ujian terbaru.</p>
         </div>
     </template>
 </div>
@@ -75,12 +82,16 @@ function homeApp() {
         loading: true,
         async init() {
             try {
-                // Fetch data menggunakan endpoint get-quiz (publik)
-                const res = await fetch('/.netlify/functions/get-quiz');
+                // Gunakan timestamp untuk menghindari caching hasil kosong di beberapa browser
+                const res = await fetch('/.netlify/functions/get-quiz?t=' + Date.now());
                 if (!res.ok) throw new Error("Gagal mengambil data");
-                this.quizzes = await res.json();
+                
+                const data = await res.json();
+                // Pastikan data yang diterima adalah array
+                this.quizzes = Array.isArray(data) ? data : [];
             } catch (e) {
                 console.error("Home Error:", e);
+                this.quizzes = [];
             } finally {
                 this.loading = false;
                 this.$nextTick(() => {
@@ -91,3 +102,8 @@ function homeApp() {
     }
 }
 </script>
+
+<style>
+    .glass { background: rgba(30, 41, 59, 0.4); backdrop-filter: blur(20px); }
+    [x-cloak] { display: none !important; }
+</style>
