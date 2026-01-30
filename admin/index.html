@@ -141,13 +141,7 @@ function adminApp() {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
 
-                // Menjadi lebih aman seperti ini:
-                const contentType = res.headers.get("content-type");
-                if (!res.ok || !contentType || !contentType.includes("application/json")) {
-                    const text = await res.text(); // Ambil teks error-nya (biasanya HTML 404)
-                    console.error("Server return bukan JSON:", text);
-                    throw new Error("Gagal mengambil data dari server. Pastikan API sudah jalan.");
-                }
+                if (!res.ok) throw new Error("Gagal mengambil data");
                 this.quizzes = await res.json();
             } catch (e) {
                 console.error("Init Error:", e);
