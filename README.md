@@ -128,4 +128,4 @@ Proyek ini dibuat untuk tujuan pendidikan. Silakan modifikasi sesuai kebutuhan A
 
 ---
 
-**Dibuat dengan ❤️ oleh [IshikawaUta**](https://www.google.com/search?q=https://github.com/IshikawaUta)
+**Dibuat dengan ❤️ oleh [IshikawaUta](https://www.google.com/search?q=https://github.com/IshikawaUta)**
