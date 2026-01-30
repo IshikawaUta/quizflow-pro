@@ -1,0 +1,92 @@
+---
+layout: default
+title: Rekapitulasi Nilai
+---
+
+<div x-data="rekapApp()" x-init="init()" class="max-w-7xl mx-auto py-12 px-6">
+    <div class="flex flex-col md:flex-row justify-between items-center mb-10 gap-6">
+        <div>
+            <h1 class="text-4xl font-black italic uppercase tracking-tighter text-white">REKAPITULASI <span class="text-blue-500">NILAI</span></h1>
+            <p class="text-slate-400">Total <span class="text-white font-bold" x-text="results.length"></span> pengerjaan.</p>
+        </div>
+        <div class="flex gap-4">
+            <button @click="exportCSV()" class="bg-emerald-600 hover:bg-emerald-500 px-6 py-3 rounded-2xl font-bold text-white flex items-center gap-2 transition-all">
+                <i data-lucide="download" class="w-5 h-5"></i> DOWNLOAD CSV
+            </button>
+            <a href="/admin" class="bg-slate-800 hover:bg-slate-700 px-6 py-3 rounded-2xl font-bold border border-slate-700 text-white flex items-center gap-2">
+                <i data-lucide="arrow-left" class="w-5 h-5"></i> KEMBALI
+            </a>
+        </div>
+    </div>
+
+    <div x-show="!loading" class="glass rounded-[2rem] border border-slate-800 bg-slate-800/30 overflow-hidden shadow-2xl">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left">
+                <thead class="bg-slate-800/50 border-b border-slate-700 text-slate-400 text-xs uppercase tracking-widest font-bold">
+                    <tr>
+                        <th class="p-6">Nama Siswa</th>
+                        <th class="p-6 text-center">Absen</th>
+                        <th class="p-6">Kelas</th>
+                        <th class="p-6 text-center">Skor</th>
+                        <th class="p-6">Waktu Selesai</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-800">
+                    <template x-for="item in results" :key="item._id">
+                        <tr class="hover:bg-blue-500/5 transition-colors">
+                            <td class="p-6 font-bold text-white uppercase" x-text="item.student_name"></td>
+                            <td class="p-6 text-center text-slate-300" x-text="item.student_absent"></td>
+                            <td class="p-6"><span class="bg-slate-700 px-3 py-1 rounded-lg text-xs" x-text="item.student_class"></span></td>
+                            <td class="p-6 text-center font-black text-xl" :class="item.score >= 70 ? 'text-emerald-400' : 'text-red-400'" x-text="item.score"></td>
+                            <td class="p-6 text-slate-400 text-sm" x-text="new Date(item.completed_at).toLocaleString('id-ID')"></td>
+                        </tr>
+                    </template>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+function rekapApp() {
+    return {
+        results: [],
+        loading: true,
+        async init() {
+            const checkUser = () => new Promise(resolve => {
+                const u = netlifyIdentity.currentUser();
+                if (u) resolve(u);
+                else netlifyIdentity.on('init', user => resolve(user));
+                setTimeout(() => resolve(null), 3000);
+            });
+
+            const user = await checkUser();
+            if (!user) { window.location.href = '/admin'; return; }
+
+            try {
+                const token = await user.jwt();
+                const res = await fetch('/.netlify/functions/manage-results', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (res.ok) this.results = await res.json();
+            } catch (e) { console.error(e); }
+            finally { 
+                this.loading = false;
+                this.$nextTick(() => lucide.createIcons());
+            }
+        },
+        exportCSV() {
+            let csv = "\uFEFFNama,Absen,Kelas,Skor,Waktu\n";
+            this.results.forEach(r => {
+                csv += `"${r.student_name}",${r.student_absent},"${r.student_class}",${r.score},"${r.completed_at}"\n`;
+            });
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = `Rekap_Nilai.csv`;
+            a.click();
+        }
+    }
+}
+</script>

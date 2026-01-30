@@ -1,0 +1,215 @@
+---
+layout: default
+title: Persiapan Ujian
+---
+<div x-data="examBot()" x-init="init()" class="max-w-3xl mx-auto py-10 px-6">
+    
+    <template x-if="loading">
+        <div class="flex flex-col items-center justify-center py-20">
+            <div class="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+            <p class="mt-4 text-slate-400 font-bold animate-pulse">MENYIAPKAN SOAL...</p>
+        </div>
+    </template>
+
+    <template x-if="!started && !loading && quiz">
+        <div class="animate-fade">
+            <div class="glass p-10 rounded-[2.5rem] shadow-2xl border-t-4 border-blue-500 bg-slate-800/40">
+                <h1 class="text-3xl font-black mb-2 italic uppercase tracking-tighter">IDENTITAS <span class="text-blue-500">SISWA</span></h1>
+                <p class="text-slate-400 mb-8">Silakan lengkapi data diri sebelum memulai ujian.</p>
+                
+                <div class="space-y-6">
+                    <div>
+                        <label class="text-xs font-bold uppercase tracking-widest text-slate-500 mb-2 block">Nama Lengkap</label>
+                        <input type="text" x-model="student.name" placeholder="Contoh: Budi Santoso" class="w-full bg-slate-900 border-none rounded-2xl p-4 focus:ring-2 focus:ring-blue-500 outline-none text-white font-bold">
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="text-xs font-bold uppercase tracking-widest text-slate-500 mb-2 block">No. Absensi</label>
+                            <input type="number" x-model="student.absent" placeholder="01" class="w-full bg-slate-900 border-none rounded-2xl p-4 focus:ring-2 focus:ring-blue-500 outline-none text-white font-bold">
+                        </div>
+                        <div>
+                            <label class="text-xs font-bold uppercase tracking-widest text-slate-500 mb-2 block">Kelas</label>
+                            <input type="text" x-model="student.class" placeholder="XII - RPL" class="w-full bg-slate-900 border-none rounded-2xl p-4 focus:ring-2 focus:ring-blue-500 outline-none text-white font-bold">
+                        </div>
+                    </div>
+
+                    <div class="bg-blue-500/10 p-4 rounded-2xl border border-blue-500/20 mb-4">
+                        <div class="flex items-center gap-3 text-blue-400 mb-1">
+                            <i data-lucide="clock" class="w-4 h-4"></i>
+                            <span class="text-xs font-black uppercase tracking-widest">Informasi Ujian</span>
+                        </div>
+                        <p class="text-sm text-slate-300">Waktu pengerjaan adalah <span class="font-bold text-white" x-text="quiz.duration"></span> menit. Pastikan koneksi internet stabil.</p>
+                    </div>
+
+                    <button @click="startUjian" :disabled="!student.name || !student.absent || !student.class" 
+                            class="w-full py-4 bg-blue-600 hover:bg-blue-500 disabled:opacity-30 disabled:cursor-not-allowed rounded-2xl font-bold text-lg transition-all shadow-xl shadow-blue-900/40 mt-4 text-white">
+                        MULAI UJIAN SEKARANG
+                    </button>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <div x-show="started && !loading" x-cloak>
+        <div class="flex justify-between items-end mb-8 border-b border-slate-800 pb-6 sticky top-0 bg-slate-900/80 backdrop-blur-md z-10 py-4">
+            <div>
+                <h1 class="text-xl font-bold text-blue-400 line-clamp-1" x-text="quiz?.title"></h1>
+                <p class="text-sm text-slate-400" x-text="student.name + ' | ' + student.class"></p>
+            </div>
+            <div class="text-right min-w-[100px]">
+                <p class="text-[10px] uppercase tracking-widest text-slate-500 font-bold">Sisa Waktu</p>
+                <p class="text-3xl font-mono font-bold" :class="timeLeft < 60 ? 'text-red-500 animate-pulse' : 'text-white'" x-text="formatTime(timeLeft)"></p>
+            </div>
+        </div>
+
+        <div class="glass p-8 rounded-[2rem] shadow-2xl animate-fade bg-slate-800/40">
+            <div class="flex justify-between items-center mb-6">
+                <span class="px-4 py-1 bg-blue-500/20 text-blue-400 rounded-full text-xs font-bold uppercase tracking-widest">Pertanyaan <span x-text="currentIndex + 1"></span> / <span x-text="quiz?.questions.length"></span></span>
+            </div>
+            
+            <h2 class="text-2xl font-medium mb-10 leading-relaxed text-white" x-text="quiz?.questions[currentIndex].text"></h2>
+            
+            <div class="space-y-4">
+                <template x-for="(opt, i) in quiz?.questions[currentIndex].options" :key="i">
+                    <button @click="answers[currentIndex] = i"
+                            :class="answers[currentIndex] === i ? 'border-blue-500 bg-blue-500/20 text-white' : 'border-slate-700 bg-slate-900/40 text-slate-300'"
+                            class="w-full text-left p-5 rounded-2xl border-2 transition-all hover:border-slate-500 flex justify-between items-center group">
+                        <span class="text-lg" x-text="opt"></span>
+                        <div class="w-6 h-6 rounded-full border-2 border-slate-600 group-hover:border-blue-500 flex items-center justify-center shrink-0">
+                            <div x-show="answers[currentIndex] === i" class="w-3 h-3 bg-blue-500 rounded-full"></div>
+                        </div>
+                    </button>
+                </template>
+            </div>
+        </div>
+
+        <div class="mt-10 flex justify-between gap-4">
+            <button @click="currentIndex--" :disabled="currentIndex === 0" 
+                    class="flex-1 px-6 py-4 rounded-2xl bg-slate-800 hover:bg-slate-700 disabled:opacity-20 font-bold transition-colors text-white uppercase tracking-widest text-xs">
+                KEMBALI
+            </button>
+            
+            <template x-if="currentIndex < quiz?.questions.length - 1">
+                <button @click="currentIndex++" 
+                        class="flex-[2] px-10 py-4 rounded-2xl bg-blue-600 hover:bg-blue-500 font-bold transition-all shadow-lg shadow-blue-900/20 text-white uppercase tracking-widest text-xs">
+                    LANJUTKAN
+                </button>
+            </template>
+            
+            <template x-if="currentIndex === quiz?.questions.length - 1">
+                <button @click="finish" 
+                        class="flex-[2] px-10 py-4 rounded-2xl bg-emerald-600 hover:bg-emerald-500 font-bold transition-all shadow-lg shadow-emerald-900/20 text-white uppercase tracking-widest text-xs">
+                    SELESAI & KIRIM
+                </button>
+            </template>
+        </div>
+    </div>
+</div>
+
+<script>
+function examBot() {
+    return {
+        quiz: null, 
+        loading: true, 
+        started: false, 
+        currentIndex: 0, 
+        timeLeft: 0, 
+        answers: [],
+        student: { name: '', absent: '', class: '' },
+        timerInterval: null,
+
+        async init() {
+            try {
+                const id = new URLSearchParams(location.search).get('id');
+                if (!id) throw new Error("ID Ujian tidak ditemukan");
+
+                const res = await fetch(`/.netlify/functions/get-quiz?id=${id}`);
+                if (!res.ok) throw new Error("Gagal mengambil data ujian");
+
+                this.quiz = await res.json();
+                this.timeLeft = this.quiz.duration * 60;
+                this.answers = Array(this.quiz.questions.length).fill(null);
+            } catch (e) {
+                alert(e.message);
+                window.location.href = '/';
+            } finally {
+                this.loading = false;
+                this.$nextTick(() => { if(window.lucide) lucide.createIcons(); });
+            }
+
+            // Proteksi: Mencegah refresh/tutup tab saat pengerjaan
+            window.addEventListener('beforeunload', (e) => {
+                if (this.started) {
+                    e.preventDefault();
+                    e.returnValue = '';
+                }
+            });
+        },
+
+        startUjian() {
+            this.started = true;
+            this.timerInterval = setInterval(() => { 
+                if(this.timeLeft > 0) {
+                    this.timeLeft--; 
+                } else {
+                    this.autoFinish(); 
+                }
+            }, 1000);
+            this.$nextTick(() => { if(window.lucide) lucide.createIcons(); });
+        },
+
+        formatTime(s) { 
+            const m = Math.floor(s/60);
+            const sec = s%60;
+            return `${m}:${sec.toString().padStart(2,'0')}`; 
+        },
+
+        async autoFinish() {
+            clearInterval(this.timerInterval);
+            alert("Waktu habis! Jawaban Anda akan dikirim secara otomatis.");
+            await this.submitData();
+        },
+
+        async finish() {
+            const unanswered = this.answers.filter(a => a === null).length;
+            const msg = unanswered > 0 
+                ? `Ada ${unanswered} soal belum dijawab. Tetap kirim?` 
+                : "Yakin ingin mengakhiri ujian?";
+            
+            if(!confirm(msg)) return;
+            await this.submitData();
+        },
+
+        async submitData() {
+            if(window.showLoader) window.showLoader(true);
+            
+            try {
+                const res = await fetch('/.netlify/functions/submit-exam', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        quiz_id: this.quiz._id, 
+                        answers: this.answers, 
+                        student_name: this.student.name,
+                        student_absent: this.student.absent,
+                        student_class: this.student.class 
+                    })
+                });
+                
+                const out = await res.json();
+                if (out.id) {
+                    // Matikan proteksi refresh sebelum pindah halaman
+                    this.started = false;
+                    window.location.href = `/result.html?id=${out.id}`;
+                } else {
+                    throw new Error("Gagal mendapatkan ID hasil");
+                }
+            } catch (e) {
+                alert("Terjadi kesalahan saat mengirim jawaban. Silakan hubungi admin.");
+                if(window.showLoader) window.showLoader(false);
+            }
+        }
+    }
+}
+</script>

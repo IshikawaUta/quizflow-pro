@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ page.title }} | QuizFlow</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script type="text/javascript" src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+    <style>
+        [x-cloak] { display: none !important; }
+        .glass { background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade { animation: fadeIn 0.4s ease-out forwards; }
+        
+        /* Transisi halus untuk auth guard */
+        body { transition: opacity 0.3s ease-in-out; }
+        .auth-hidden { opacity: 0; pointer-events: none; }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-100 font-sans min-h-screen">
+    
+    <div id="loader" class="fixed inset-0 z-[100] bg-slate-950/80 backdrop-blur-md hidden flex items-center justify-center">
+        <div class="flex flex-col items-center">
+            <div class="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+            <p class="mt-4 text-blue-400 font-medium tracking-widest animate-pulse">MEMPROSES...</p>
+        </div>
+    </div>
+
+    <main>
+        {{ content }}
+    </main>
+
+    <script>
+        // 1. Inisialisasi Ikon Lucide
+        lucide.createIcons();
+
+        // 2. Skrip Auth Guard & UI Admin Dinamis
+        document.addEventListener("DOMContentLoaded", () => {
+            const path = window.location.pathname;
+            const isAdminPage = path.includes('/admin');
+
+            // Fungsi Update Nama Admin di Navigasi
+            const updateAdminUI = (user) => {
+                const nameEl = document.getElementById('admin-name') || document.getElementById('admin-name-display');
+                if (nameEl && user) {
+                    nameEl.innerText = user.user_metadata?.full_name || user.email.split('@')[0];
+                }
+            };
+
+            if (window.netlifyIdentity) {
+                // Event saat Identity diinisialisasi
+                window.netlifyIdentity.on("init", user => {
+                    if (isAdminPage && !user) {
+                        // Jika di halaman admin tapi belum login
+                        document.body.classList.add('auth-hidden');
+                        netlifyIdentity.open('login');
+                    } else if (user) {
+                        updateAdminUI(user);
+                    }
+                });
+
+                // Event Login
+                window.netlifyIdentity.on("login", user => {
+                    updateAdminUI(user);
+                    if (isAdminPage) {
+                        document.body.classList.remove('auth-hidden');
+                        location.reload(); // Reload untuk memastikan data Alpine ter-fetch dengan token baru
+                    } else {
+                        document.location.href = "/admin/";
+                    }
+                });
+
+                // Event Logout
+                window.netlifyIdentity.on("logout", () => {
+                    if (isAdminPage) {
+                        window.location.href = "/";
+                    }
+                });
+
+                // Jika user menutup modal login paksa di halaman admin
+                window.netlifyIdentity.on("close", () => {
+                    const user = netlifyIdentity.currentUser();
+                    if (isAdminPage && !user) {
+                        window.location.href = "/";
+                    }
+                });
+            }
+        });
+
+        // Helper untuk menampilkan/menyembunyikan loader global dari script lain
+        window.showLoader = (show) => {
+            const loader = document.getElementById('loader');
+            if (show) loader.classList.remove('hidden');
+            else loader.classList.add('hidden');
+        };
+    </script>
+</body>
+</html>

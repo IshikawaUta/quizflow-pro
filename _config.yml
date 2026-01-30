@@ -1,0 +1,39 @@
+title: QuizFlow Pro
+email: admin@quizflow.com
+description: >-
+  Platform ujian online modern (CBT) berbasis Serverless dengan Netlify Functions dan MongoDB.
+  Dibuat untuk performa tinggi, keamanan maksimal, dan antarmuka yang responsif.
+
+url: "https://quizflow-pro.netlify.app"
+baseurl: ""
+
+markdown: kramdown
+highlighter: rouge
+lsi: false
+
+plugins:
+  - jekyll-feed
+  - jekyll-seo-tag
+
+exclude:
+  - node_modules/
+  - vendor/
+  - .netlify/
+  - netlify/
+  - .github/
+  - .gitignore
+  - package.json
+  - package-lock.json
+  - Gemfile
+  - Gemfile.lock
+  - README.md
+
+collections:
+  posts:
+    output: true
+
+defaults:
+  - scope:
+      path: ""
+    values:
+      layout: "default"

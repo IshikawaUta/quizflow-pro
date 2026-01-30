@@ -1,0 +1,223 @@
+---
+layout: default
+title: Hasil Ujian Anda
+---
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<div x-data="resultApp()" x-init="init()" class="min-h-screen p-4 md:p-8">
+    
+    <template x-if="loading">
+        <div class="fixed inset-0 flex items-center justify-center bg-slate-900 z-50">
+            <div class="flex flex-col items-center">
+                <div class="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+                <p class="text-blue-400 font-bold animate-pulse tracking-widest">MENGHITUNG SKOR...</p>
+            </div>
+        </div>
+    </template>
+
+    <div class="max-w-4xl mx-auto" x-show="!loading" x-cloak x-transition:enter="transition ease-out duration-500" x-transition:enter-start="opacity-0 transform translate-y-4">
+        
+        <div class="glass p-8 md:p-12 rounded-[2.5rem] shadow-2xl mb-10 relative overflow-hidden border border-slate-700/50 bg-slate-800/40">
+            <div class="absolute -top-24 -right-24 w-64 h-64 bg-blue-600/10 rounded-full blur-3xl"></div>
+            <div class="absolute -bottom-24 -left-24 w-64 h-64 bg-purple-600/10 rounded-full blur-3xl"></div>
+
+            <div class="relative z-10 flex flex-col md:flex-row items-center justify-between gap-10">
+                <div class="text-center md:text-left flex-1">
+                    <div class="inline-block px-4 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 mb-4">
+                        <span class="text-[10px] uppercase tracking-[0.2em] text-blue-400 font-black">Laporan Hasil Resmi</span>
+                    </div>
+                    <h2 class="text-3xl md:text-5xl font-black text-white italic mb-6 leading-tight uppercase tracking-tighter" x-text="data.quiz_title"></h2>
+                    
+                    <div class="bg-slate-950/40 rounded-[2rem] p-6 border border-slate-700/30 mb-6 space-y-4 backdrop-blur-sm">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-2xl bg-blue-600/20 flex items-center justify-center text-blue-400 border border-blue-500/20">
+                                <i data-lucide="user" class="w-6 h-6"></i>
+                            </div>
+                            <div>
+                                <p class="text-[10px] uppercase tracking-widest text-slate-500 font-black">Peserta Ujian</p>
+                                <p class="text-xl font-bold text-white uppercase" x-text="data.student_name"></p>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4 pt-4 border-t border-slate-800">
+                            <div class="flex items-center gap-3">
+                                <i data-lucide="hash" class="w-4 h-4 text-slate-500"></i>
+                                <div>
+                                    <p class="text-[10px] uppercase text-slate-500 font-bold italic">Absen</p>
+                                    <p class="font-bold text-slate-200" x-text="data.student_absent"></p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <i data-lucide="layers" class="w-4 h-4 text-slate-500"></i>
+                                <div>
+                                    <p class="text-[10px] uppercase text-slate-500 font-bold italic">Kelas</p>
+                                    <p class="font-bold text-slate-200" x-text="data.student_class"></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="inline-flex items-center gap-3 px-8 py-4 rounded-2xl font-black text-sm tracking-widest shadow-xl transition-all"
+                         :class="data.score >= 70 ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 shadow-emerald-900/10' : 'bg-red-500/20 text-red-400 border border-red-500/30 shadow-red-900/10'">
+                        <i :data-lucide="data.score >= 70 ? 'check-circle' : 'x-circle'" class="w-5 h-5"></i>
+                        <span x-text="data.score >= 70 ? 'UJIAN SELESAI: LULUS' : 'UJIAN SELESAI: TIDAK LULUS'"></span>
+                    </div>
+                </div>
+
+                <div class="relative flex items-center justify-center shrink-0 p-4 bg-slate-900/30 rounded-[3rem] border border-slate-700/20">
+                    <div class="w-48 h-48">
+                        <canvas id="scoreChart"></canvas>
+                    </div>
+                    <div class="absolute flex flex-col items-center">
+                        <span class="text-6xl font-black text-white tracking-tighter" x-text="data.score"></span>
+                        <span class="text-[10px] text-slate-500 font-black tracking-[0.3em] uppercase">Point</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-12 border-t border-slate-800 pt-8">
+                <div class="bg-slate-900/30 p-4 rounded-2xl border border-slate-800">
+                    <p class="text-slate-500 text-[10px] uppercase font-black tracking-widest mb-1">Benar</p>
+                    <p class="text-2xl font-bold text-emerald-400" x-text="data.correct_count"></p>
+                </div>
+                <div class="bg-slate-900/30 p-4 rounded-2xl border border-slate-800">
+                    <p class="text-slate-500 text-[10px] uppercase font-black tracking-widest mb-1">Salah</p>
+                    <p class="text-2xl font-bold text-red-400" x-text="data.wrong_count"></p>
+                </div>
+                <div class="bg-slate-900/30 p-4 rounded-2xl border border-slate-800">
+                    <p class="text-slate-500 text-[10px] uppercase font-black tracking-widest mb-1">Persentase</p>
+                    <p class="text-2xl font-bold text-blue-400" x-text="data.score + '%'"></p>
+                </div>
+                <div class="bg-slate-900/30 p-4 rounded-2xl border border-slate-800">
+                    <p class="text-slate-500 text-[10px] uppercase font-black tracking-widest mb-1">Waktu Selesai</p>
+                    <p class="text-[10px] font-bold text-slate-300 mt-2 leading-tight" x-text="formatDate(data.completed_at)"></p>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex mb-16">
+            <a href="/" class="flex-1 bg-slate-800 hover:bg-slate-700 text-white text-center py-4 rounded-2xl font-bold transition-all flex items-center justify-center gap-2 border border-slate-700 active:scale-95 shadow-xl">
+                <i data-lucide="home" class="w-5 h-5 text-blue-400"></i> Kembali ke Beranda
+            </a>
+        </div>
+
+        <div class="space-y-8 mb-20">
+            <div class="flex items-center gap-4 mb-8">
+                <div class="h-px bg-slate-800 flex-1"></div>
+                <h3 class="text-sm font-black flex items-center gap-3 text-slate-500 uppercase tracking-[0.3em]">
+                    <i data-lucide="list-checks" class="text-blue-500 w-5 h-5"></i> Analisis Jawaban
+                </h3>
+                <div class="h-px bg-slate-800 flex-1"></div>
+            </div>
+
+            <template x-for="(question, index) in data.quiz_details" :key="index">
+                <div class="glass border rounded-[2rem] p-6 md:p-8 transition-all bg-slate-800/20"
+                     :class="data.student_answers[index] === question.correct_answer_index ? 'border-emerald-500/20' : 'border-red-500/20'">
+                    
+                    <div class="flex gap-4 mb-6">
+                        <span class="flex-shrink-0 w-10 h-10 rounded-xl bg-slate-900 text-blue-400 border border-slate-700 flex items-center justify-center font-black italic" x-text="index + 1"></span>
+                        <h4 class="text-lg font-medium text-slate-200 leading-relaxed pt-1" x-text="question.text"></h4>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 ml-0 md:ml-14">
+                        <template x-for="(option, optIndex) in question.options" :key="optIndex">
+                            <div class="p-4 rounded-2xl text-sm border flex justify-between items-center transition-all"
+                                 :class="getOptionStyle(index, optIndex, question.correct_answer_index)">
+                                <div class="flex items-center gap-3">
+                                    <span class="w-6 h-6 rounded-lg border border-current flex items-center justify-center text-[10px] font-bold" x-text="String.fromCharCode(65 + optIndex)"></span>
+                                    <span x-text="option"></span>
+                                </div>
+                                <div class="flex items-center">
+                                    <template x-if="optIndex === question.correct_answer_index">
+                                        <div class="bg-emerald-500 text-white p-1 rounded-lg"><i data-lucide="check" class="w-3 h-3"></i></div>
+                                    </template>
+                                    <template x-if="data.student_answers[index] === optIndex && optIndex !== question.correct_answer_index">
+                                        <div class="bg-red-500 text-white p-1 rounded-lg"><i data-lucide="x" class="w-3 h-3"></i></div>
+                                    </template>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+            </template>
+        </div>
+    </div>
+</div>
+
+<script>
+function resultApp() {
+    return {
+        loading: true,
+        data: {
+            quiz_title: '', student_name: '', student_absent: '', student_class: '',
+            score: 0, correct_count: 0, wrong_count: 0,
+            completed_at: '', student_answers: [], quiz_details: []
+        },
+
+        async init() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const resultId = urlParams.get('id');
+
+            if (!resultId) {
+                window.location.href = '/';
+                return;
+            }
+
+            try {
+                const response = await fetch(`/.netlify/functions/get-result?id=${resultId}`);
+                if (!response.ok) throw new Error("Data tidak ditemukan");
+                this.data = await response.json();
+            } catch (err) {
+                console.error(err);
+                alert("Gagal memuat hasil.");
+                window.location.href = '/';
+            } finally {
+                this.loading = false;
+                this.$nextTick(() => {
+                    this.renderChart();
+                    if (window.lucide) lucide.createIcons();
+                });
+            }
+        },
+
+        renderChart() {
+            const canvas = document.getElementById('scoreChart');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    datasets: [{
+                        data: [this.data.correct_count, this.data.wrong_count],
+                        backgroundColor: ['#3b82f6', '#1e293b'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    cutout: '82%',
+                    responsive: true,
+                    plugins: { legend: { display: false }, tooltip: { enabled: false } }
+                }
+            });
+        },
+
+        getOptionStyle(qIdx, optIdx, correctIdx) {
+            const studentAns = this.data.student_answers[qIdx];
+            if (optIdx === correctIdx) return 'bg-emerald-500/10 border-emerald-500/40 text-emerald-400 font-bold';
+            if (studentAns === optIdx && studentAns !== correctIdx) return 'bg-red-500/10 border-red-500/40 text-red-400';
+            return 'bg-slate-900/40 border-slate-800 text-slate-500 opacity-50';
+        },
+
+        formatDate(dateStr) {
+            if (!dateStr) return "-";
+            return new Date(dateStr).toLocaleDateString('id-ID', { 
+                day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' 
+            }).replace(/\./g, ':');
+        }
+    }
+}
+</script>
+
+<style>
+[x-cloak] { display: none !important; }
+</style>

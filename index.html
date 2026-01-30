@@ -1,0 +1,93 @@
+---
+layout: default
+title: Beranda
+---
+
+<div class="max-w-6xl mx-auto py-16 px-6" x-data="homeApp()" x-init="init()">
+    <header class="flex flex-col md:flex-row justify-between items-center mb-16 gap-6">
+        <div class="text-center md:text-left">
+            <h1 class="text-5xl font-black tracking-tighter italic uppercase text-white">
+                QUIZ<span class="text-blue-500">FLOW</span>
+            </h1>
+            <p class="text-slate-400 mt-2 font-medium">Pilih ujian dan uji kemampuanmu sekarang.</p>
+        </div>
+        
+        <div class="bg-slate-800/50 p-2 rounded-2xl border border-slate-700">
+            <div data-netlify-identity-button></div>
+        </div>
+    </header>
+
+    <template x-if="loading">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <template x-for="i in 3">
+                <div class="glass p-8 rounded-[2.5rem] border border-slate-800 animate-pulse">
+                    <div class="w-12 h-12 bg-slate-800 rounded-2xl mb-6"></div>
+                    <div class="h-6 bg-slate-800 rounded-lg w-3/4 mb-4"></div>
+                    <div class="h-4 bg-slate-800 rounded-lg w-1/2 mb-8"></div>
+                    <div class="h-12 bg-slate-800 rounded-2xl w-full"></div>
+                </div>
+            </template>
+        </div>
+    </template>
+
+    <div x-show="!loading" class="grid grid-cols-1 md:grid-cols-3 gap-8" style="display: none;">
+        <template x-for="quiz in quizzes" :key="quiz._id">
+            <div class="glass p-8 rounded-[2.5rem] hover:scale-[1.03] hover:shadow-2xl hover:shadow-blue-900/20 transition-all duration-300 group relative overflow-hidden flex flex-col border border-slate-800 bg-slate-800/30">
+                <div class="absolute -right-4 -top-4 w-24 h-24 bg-blue-500/5 rounded-full blur-2xl group-hover:bg-blue-500/10"></div>
+                
+                <div class="flex items-center justify-between mb-6">
+                    <div class="w-12 h-12 bg-blue-600/10 rounded-2xl flex items-center justify-center border border-blue-500/20">
+                        <i data-lucide="book-open" class="text-blue-400 w-6 h-6"></i>
+                    </div>
+                    <div class="flex flex-col items-end">
+                        <span class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Durasi</span>
+                        <span class="text-sm font-bold text-blue-400 uppercase" x-text="quiz.duration + ' Menit'"></span>
+                    </div>
+                </div>
+
+                <h3 class="text-2xl font-bold mb-2 text-white group-hover:text-blue-400 transition-colors" x-text="quiz.title"></h3>
+                <p class="text-slate-400 text-sm mb-8 flex-grow">
+                    Terdapat <span class="text-slate-200 font-bold" x-text="quiz.questions.length"></span> pertanyaan. 
+                    Minimal kelulusan: <span class="text-emerald-400 font-bold" x-text="quiz.passing_score + '%'"></span>
+                </p>
+
+                <a :href="'/exam.html?id=' + quiz._id" 
+                   class="block w-full text-center py-4 bg-white text-slate-900 rounded-2xl font-black uppercase tracking-tighter hover:bg-blue-600 hover:text-white transition-all shadow-xl shadow-white/5 active:scale-95">
+                    Mulai Ujian
+                </a>
+            </div>
+        </template>
+    </div>
+
+    <template x-if="quizzes.length === 0 && !loading">
+        <div class="text-center py-24 glass rounded-[3rem] border border-dashed border-slate-700">
+            <i data-lucide="inbox" class="w-20 h-20 text-slate-800 mx-auto mb-6"></i>
+            <h2 class="text-xl font-bold text-slate-300 mb-2">Belum Ada Ujian</h2>
+            <p class="text-slate-500">Silakan hubungi pengajar untuk ketersediaan ujian terbaru.</p>
+        </div>
+    </template>
+</div>
+
+<script>
+function homeApp() {
+    return {
+        quizzes: [],
+        loading: true,
+        async init() {
+            try {
+                // Fetch data menggunakan endpoint get-quiz (publik)
+                const res = await fetch('/.netlify/functions/get-quiz');
+                if (!res.ok) throw new Error("Gagal mengambil data");
+                this.quizzes = await res.json();
+            } catch (e) {
+                console.error("Home Error:", e);
+            } finally {
+                this.loading = false;
+                this.$nextTick(() => {
+                    if (window.lucide) lucide.createIcons();
+                });
+            }
+        }
+    }
+}
+</script>

@@ -1,0 +1,170 @@
+---
+layout: default
+title: Edit Ujian
+---
+
+<div x-data="editApp()" x-init="init()" class="max-w-4xl mx-auto py-12 px-6 min-h-screen">
+    
+    <div class="flex items-center justify-between mb-10">
+        <div class="flex items-center gap-4">
+            <a href="/admin" class="group p-3 bg-slate-800 rounded-2xl hover:bg-blue-600 transition-all shadow-lg">
+                <i data-lucide="arrow-left" class="text-white group-hover:-translate-x-1 transition-transform"></i>
+            </a>
+            <div>
+                <h1 class="text-3xl font-black italic text-white uppercase tracking-tighter leading-none">EDIT <span class="text-blue-500">UJIAN</span></h1>
+                <p class="text-slate-500 text-xs font-bold uppercase tracking-widest mt-1">ID: <span class="text-slate-400" x-text="quizId"></span></p>
+            </div>
+        </div>
+    </div>
+
+    <template x-if="fetching">
+        <div class="flex flex-col items-center justify-center py-32 space-y-6">
+            <div class="relative">
+                <div class="w-16 h-16 border-4 border-blue-500/20 rounded-full"></div>
+                <div class="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin absolute top-0"></div>
+            </div>
+            <p class="text-slate-400 font-black italic tracking-widest animate-pulse">MENGAMBIL DATA...</p>
+        </div>
+    </template>
+
+    <div x-show="!fetching" 
+         x-transition:enter="transition ease-out duration-500"
+         x-transition:enter-start="opacity-0 translate-y-8"
+         x-transition:enter-end="opacity-100 translate-y-0"
+         class="glass p-8 md:p-12 rounded-[3rem] border border-slate-800 shadow-2xl space-y-10 bg-slate-800/30 backdrop-blur-xl" 
+         style="display: none;">
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div class="md:col-span-2">
+                <label class="block text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-3 ml-2">Judul Ujian</label>
+                <input type="text" x-model="quiz.title" class="w-full bg-slate-900/80 border-2 border-slate-800 rounded-2xl p-4 focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 outline-none text-white font-bold transition-all">
+            </div>
+            <div>
+                <label class="block text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-3 ml-2">Durasi (Menit)</label>
+                <div class="relative">
+                    <input type="number" x-model.number="quiz.duration" class="w-full bg-slate-900/80 border-2 border-slate-800 rounded-2xl p-4 focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 outline-none text-white font-bold transition-all">
+                    <i data-lucide="clock" class="absolute right-4 top-4 text-slate-600 w-5 h-5"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="space-y-12">
+            <template x-for="(q, index) in quiz.questions" :key="index">
+                <div class="p-8 bg-slate-900/40 rounded-[2.5rem] border border-slate-800 relative group transition-all hover:border-slate-700 shadow-inner">
+                    <button @click="removeQuestion(index)" class="absolute -top-3 -right-3 w-10 h-10 bg-slate-800 text-red-400 border border-slate-700 rounded-2xl flex items-center justify-center shadow-xl hover:bg-red-500 hover:text-white transition-all z-10">
+                        <i data-lucide="trash-2" class="w-5 h-5"></i>
+                    </button>
+
+                    <div class="mb-8">
+                        <label class="text-[10px] font-black text-blue-500 uppercase tracking-widest mb-3 block" x-text="'Pertanyaan #' + (index + 1)"></label>
+                        <textarea x-model="q.text" class="w-full bg-slate-900 border-2 border-slate-800 rounded-2xl p-5 focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none text-white text-sm leading-relaxed min-h-[100px]" rows="3"></textarea>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <template x-for="(opt, optIdx) in q.options" :key="optIdx">
+                            <div class="relative flex items-center group/opt">
+                                <div class="absolute left-4 z-10 flex items-center">
+                                    <input type="radio" :name="'correct_'+index" :value="optIdx" x-model.number="q.correct_answer_index" class="w-5 h-5 accent-emerald-500 cursor-pointer">
+                                </div>
+                                <input type="text" x-model="q.options[optIdx]" class="w-full bg-slate-950/50 border-2 border-slate-800 pl-12 pr-4 py-4 rounded-2xl outline-none text-sm transition-all" :class="q.correct_answer_index == optIdx ? 'border-emerald-500/40 text-emerald-400 bg-emerald-500/5' : 'text-slate-300 focus:border-slate-600'">
+                            </div>
+                        </template>
+                    </div>
+                </div>
+            </template>
+        </div>
+
+        <div class="space-y-4 pt-6">
+            <button @click="addQuestion()" class="w-full py-5 border-2 border-dashed border-slate-800 rounded-[2rem] text-slate-500 font-black text-xs uppercase tracking-[0.2em] hover:border-blue-500 hover:text-blue-500 transition-all flex items-center justify-center gap-3">
+                <i data-lucide="plus-circle" class="w-5 h-5"></i> TAMBAH PERTANYAAN
+            </button>
+
+            <button @click="updateQuiz()" :disabled="saving" class="w-full py-6 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white rounded-[2.5rem] font-black text-xl shadow-2xl transition-all flex items-center justify-center gap-3">
+                <span x-show="!saving">SIMPAN PERUBAHAN</span>
+                <span x-show="saving">SEDANG MENYIMPAN...</span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+function editApp() {
+    return {
+        quiz: { title: '', duration: 30, questions: [] },
+        quizId: null,
+        fetching: true,
+        saving: false,
+
+        async init() {
+            const params = new URLSearchParams(window.location.search);
+            this.quizId = params.get('id');
+            
+            if (!this.quizId) {
+                window.location.href = '/admin';
+                return;
+            }
+
+            try {
+                // Fetch data tetap bisa dilakukan tanpa token jika function-nya diizinkan, 
+                // tapi biasanya manage-quizzes.js butuh user context.
+                const res = await fetch(`/.netlify/functions/manage-quizzes?id=${this.quizId}`);
+                if (res.ok) {
+                    const data = await res.json();
+                    this.quiz = {
+                        title: data.title || '',
+                        duration: data.duration || 30,
+                        questions: data.questions || []
+                    };
+                }
+            } catch (e) {
+                console.error(e);
+            } finally {
+                this.fetching = false;
+                this.$nextTick(() => { if(window.lucide) lucide.createIcons(); });
+            }
+        },
+
+        addQuestion() {
+            this.quiz.questions.push({ text: '', options: ['', '', '', ''], correct_answer_index: 0 });
+            this.$nextTick(() => { if(window.lucide) lucide.createIcons(); });
+        },
+
+        removeQuestion(index) {
+            if(this.quiz.questions.length > 1) this.quiz.questions.splice(index, 1);
+        },
+
+        async updateQuiz() {
+            this.saving = true;
+            try {
+                // Catatan: Jika backend manage-quizzes.js mengecek 'context.clientContext.user', 
+                // baris di bawah ini tetap diperlukan agar server mengizinkan akses simpan.
+                const user = netlifyIdentity.currentUser();
+                const token = await user?.jwt();
+
+                const res = await fetch(`/.netlify/functions/manage-quizzes?id=${this.quizId}`, {
+                    method: 'PUT',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}` 
+                    },
+                    body: JSON.stringify(this.quiz)
+                });
+
+                if (res.ok) {
+                    alert("Berhasil diperbarui!");
+                    window.location.href = '/admin';
+                }
+            } catch (e) {
+                alert("Gagal: " + e.message);
+            } finally {
+                this.saving = false;
+            }
+        }
+    }
+}
+</script>
+
+<style>
+    .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(20px); }
+    [x-cloak] { display: none !important; }
+</style>
